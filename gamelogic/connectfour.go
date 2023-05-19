@@ -21,14 +21,20 @@ func InitBoard(n_rows, n_cols int, player1, player2 byte) (Board, error) {
 		return b, errors.New("impossible board attributes")
 	}
 
+	if player1 == player2 {
+		return b, errors.New("players must be distinct")
+	}
+
 	players := [2]byte{player1, player2}
 
-	n_placement := make([]int, n_rows)
-	table := make([][]byte, n_rows)
+	n_placement := make([]int, n_cols)
+	for i := range n_placement {
+		n_placement[i] = n_rows - 1
+	}
 
+	table := make([][]byte, n_rows)
 	for i := range table {
 		table[i] = make([]byte, n_cols)
-		n_placement[i] = n_cols - 1
 	}
 
 	b = Board{n_rows, n_cols, 0, players, n_placement, table}
@@ -59,7 +65,7 @@ func (b *Board) String() string {
 	for i := 0; i < b.Num_rows; i++ {
 		for j := 0; j < b.Num_cols; j++ {
 			if j == 0 {
-				str += " | "
+				str += " |"
 			}
 			str += " "
 			if b.Table[i][j] == 0 {
@@ -69,7 +75,7 @@ func (b *Board) String() string {
 			}
 
 			if j == b.Num_cols-1 {
-				str += "|"
+				str += " |"
 			}
 		}
 		str += "\n"
@@ -83,20 +89,19 @@ func (b *Board) String() string {
 }
 
 // place the players move on the board. returns an error if move is not allowed
-func (b *Board) Move(x int) (int, int, error) {
+func (b *Board) Move(y int) (int, int, error) {
 
-	if x < 0 || x > b.Num_cols-1 {
+	if y < 0 || y > b.Num_cols-1 {
 		return -1, -1, errors.New("out of bounds move")
 	}
 
-	if b.NextPlacement[x] < 0 {
+	if b.NextPlacement[y] < 0 {
 		return -1, -1, errors.New("column full")
 	}
 
-	b.Table[x][b.NextPlacement[x]] = b.Players[b.CurrPlayer]
-	b.NextPlacement[x]--
-	b.CurrPlayer = (b.CurrPlayer + 1) % 2 // go to next player
-	return x, b.NextPlacement[x] + 1, nil
+	b.Table[b.NextPlacement[y]][y] = b.Players[b.CurrPlayer]
+	b.NextPlacement[y]--
+	return b.NextPlacement[y] + 1, y, nil
 }
 
 // returns the outcome of the game. 0 for tie, 1 for win and 2 for keep playing
@@ -194,4 +199,9 @@ func (b *Board) Outcome(x, y int) int {
 		}
 	}
 	return 0
+}
+
+// move to the next player
+func (b *Board) NextPlayer() {
+	b.CurrPlayer = (b.CurrPlayer + 1) % 2
 }
