@@ -7,8 +7,8 @@ import (
 	"psmccarty.com/gamelogic"
 )
 
- const NUM_ROWS int = 6
- const NUM_COLS int = 7
+const NUM_ROWS int = 6
+const NUM_COLS int = 7
 const PLAYER1 byte = 'X'
 const PLAYER2 byte = 'O'
 
